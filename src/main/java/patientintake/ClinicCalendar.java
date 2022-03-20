@@ -1,12 +1,13 @@
 package patientintake;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ClinicCalendar {
 
-	private List<PatientAppointment> appointments;
+	private final List<PatientAppointment> appointments;
 
 	public ClinicCalendar() {
 		this.appointments = new ArrayList<>();
@@ -32,4 +33,9 @@ public class ClinicCalendar {
 		return this.appointments;
 	}
 
+	public boolean hasAppointment(LocalDate date) {
+		return appointments.stream()
+				.anyMatch(appointment -> appointment.getAppointmentDateTime().toLocalDate()
+						.equals(date));
+	}
 }

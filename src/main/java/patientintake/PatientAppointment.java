@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 
 public class PatientAppointment {
 
-	private String patientFirstName;
-	private String patientLastName;
-	private LocalDateTime appointmentDateTime;
-	private Doctor doctor;
+	private final String patientFirstName;
+	private final String patientLastName;
+	private final LocalDateTime appointmentDateTime;
+	private final Doctor doctor;
 
 	public PatientAppointment(String patientFirstName, String patientLastName, LocalDateTime appointmentDateTime, Doctor doctor) {
 		this.patientFirstName = patientFirstName;
