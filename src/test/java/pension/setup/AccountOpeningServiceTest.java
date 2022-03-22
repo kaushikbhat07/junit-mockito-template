@@ -11,8 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static pension.setup.AccountOpeningService.ACCEPTABLE_RISK_PROFILE;
 import static pension.setup.AccountOpeningService.UNACCEPTABLE_RISK_PROFILE;
 
@@ -22,6 +21,7 @@ class AccountOpeningServiceTest {
 	public static final String TAX_ID = "123";
 	public static final LocalDate DOB = LocalDate.now();
 	public static final String MIDDLE_NAME = "";
+	public static final String ACCOUNT_ID = "random_id";
 
 	private AccountOpeningService accountOpeningService;
 
@@ -38,14 +38,20 @@ class AccountOpeningServiceTest {
 
 	@Test
 	void shouldOpenAccount() throws IOException {
+		BackgroundCheckResults acceptableBackgroundCheckResults =
+				new BackgroundCheckResults(ACCEPTABLE_RISK_PROFILE, 100);
+
 		when(backgroundCheckService.confirm(FIRST_NAME, LAST_NAME, TAX_ID, DOB))
-				.thenReturn(new BackgroundCheckResults(ACCEPTABLE_RISK_PROFILE, 100));
+				.thenReturn(acceptableBackgroundCheckResults);
 
 		when(referenceIdsManager.obtainId(eq(FIRST_NAME), anyString(), eq(LAST_NAME), eq(TAX_ID), eq(DOB)))
-				.thenReturn("random_id");
+				.thenReturn(ACCOUNT_ID);
 
 		final AccountOpeningStatus accountOpeningStatus = accountOpeningService.openAccount(FIRST_NAME, LAST_NAME, TAX_ID, DOB);
 		assertEquals(accountOpeningStatus, AccountOpeningStatus.OPENED);
+
+		verify(accountRepository).save(ACCOUNT_ID, FIRST_NAME, LAST_NAME, TAX_ID, DOB, acceptableBackgroundCheckResults);
+		verify(accountOpeningEventPublisher).notify(ACCOUNT_ID);
 	}
 
 	@Test
