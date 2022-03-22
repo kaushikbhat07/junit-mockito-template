@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pension.setup.AccountOpeningService.ACCEPTABLE_RISK_PROFILE;
@@ -38,7 +41,7 @@ class AccountOpeningServiceTest {
 		when(backgroundCheckService.confirm(FIRST_NAME, LAST_NAME, TAX_ID, DOB))
 				.thenReturn(new BackgroundCheckResults(ACCEPTABLE_RISK_PROFILE, 100));
 
-		when(referenceIdsManager.obtainId(FIRST_NAME, MIDDLE_NAME,LAST_NAME, TAX_ID, DOB))
+		when(referenceIdsManager.obtainId(eq(FIRST_NAME), anyString(), eq(LAST_NAME), eq(TAX_ID), eq(DOB)))
 				.thenReturn("random_id");
 
 		final AccountOpeningStatus accountOpeningStatus = accountOpeningService.openAccount(FIRST_NAME, LAST_NAME, TAX_ID, DOB);
@@ -73,5 +76,12 @@ class AccountOpeningServiceTest {
 
 		final AccountOpeningStatus accountOpeningStatus = accountOpeningService.openAccount(FIRST_NAME, LAST_NAME, TAX_ID, DOB);
 		assertEquals(accountOpeningStatus, AccountOpeningStatus.DECLINED);
+	}
+
+	@Test
+	void shouldDeclineAccountIfBackgroundCheckThrowsIOException() throws IOException {
+		when(backgroundCheckService.confirm(FIRST_NAME, LAST_NAME, TAX_ID, DOB))
+				.thenThrow(new IOException());
+		assertThrows(IOException.class, () -> accountOpeningService.openAccount(FIRST_NAME, LAST_NAME, TAX_ID, DOB));
 	}
 }
