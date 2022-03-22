@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.format.DateTimeFormatter;
@@ -38,15 +39,19 @@ class ClinicCalendarTest {
 
 		List<PatientAppointment> appointmentList = clinicCalendar.getAppointments();
 		assertNotNull(appointmentList);
-		assertEquals(1, appointmentList.size());
 		PatientAppointment patientAppointment = appointmentList.get(0);
-		assertEquals("Kaushik", patientAppointment.getPatientFirstName());
-		assertEquals("Bhat", patientAppointment.getPatientLastName());
-		assertEquals(Doctor.avery, patientAppointment.getDoctor());
-		assertEquals("09/01/2018 02:00 PM", patientAppointment.getAppointmentDateTime()
-				.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a")));
+		assertAll(
+				() -> assertEquals(1, appointmentList.size()),
+				() -> assertEquals("Kaushik", patientAppointment.getPatientFirstName()),
+				() -> assertEquals("Bhat", patientAppointment.getPatientLastName()),
+				() -> assertEquals(Doctor.avery, patientAppointment.getDoctor()),
+				() -> assertEquals("09/01/2018 02:00 PM", patientAppointment.getAppointmentDateTime()
+								.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a"))
+						, "Your custom error message here")
+		);
 	}
 
+	@DisplayName("Throws Runtime Exception when provided date format is incorrect")
 	@Test
 	void throwsExceptionIfIncorrectDateProvided() {
 		assertThrows(RuntimeException.class, () -> clinicCalendar.addAppointment("Kaushik",
